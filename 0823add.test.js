@@ -3,7 +3,7 @@
     2.update package.json 【"test": "jest"】
     3.npm run test
 */
-
+// flow test
 function add(a, b) {
     return a+b;
 }
