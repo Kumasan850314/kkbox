@@ -1,0 +1,242 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.js"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+  integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<div id="app">
+  <br>
+  <div class="text-center">
+    <!-- <div style="margin-bottom: 1%;"> 輸入國家正確名字 => <input type="text" v-model="inputSearch"></div> -->
+    <!-- <p style="text-align:left;margin-left: 1%;" v-if="nowSearch">Search result: {{ nowSearch }}</p> -->
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">album pic</th>
+        <th scope="col">name</th>
+        <th scope="col">album name</th>
+        <th scope="col">
+          <!-- <span class="btn btn-outline-primary" v-on:click="search()">search</span> -->
+          <span class="btn btn-outline-primary" v-on:click="sorted(responseObject, '正')">正序</span>
+          <span class="btn btn-outline-primary" v-on:click="sorted(responseObject, '反')">反序</span>
+          release_date
+        </th>
+        <th scope="col">專輯歌曲</th>
+      </tr>
+    </thead>
+    <tbody v-if="newSorted.length!==0">
+      <tr>
+        <!-- <td v-cloak :class="{ active: isActive}">{{ countryExist  }}</td> -->
+      </tr>
+      <tr v-for="(newSortedList,index) in newSorted" v-cloak>
+        <td><img v-bind:src="newSortedList[1].album.images[0].url" style="width:50px;" /></td>
+        <td>{{ newSortedList[1].album.artist.name }}</td>
+        <td>{{ newSortedList[1].name }}</td>
+        <td>{{ newSortedList[1].album.release_date }}</td>
+        <td><span class="btn btn-outline-primary" v-on:click="albums(newSortedList[1].album.id, newSortedList[1].name)" data-toggle="modal" data-target="#myModal">Check</span></td>
+      </tr>
+    </tbody>
+
+    <tbody v-if="newSorted.length===0">
+      <tr>
+        <!-- <td v-cloak :class="{ active: isActive}">{{ countryExist  }}</td> -->
+      </tr>
+      <tr v-for="(responseObjectList,index) in responseObject" v-cloak>
+        <td><img v-bind:src="responseObjectList.album.images[0].url" style="width:50px;" /></td>
+        <td>{{ responseObjectList.album.artist.name }}</td>
+        <td>{{ responseObjectList.name }}</td>
+        <td>{{ responseObjectList.album.release_date }}</td>
+        <td><span class="btn btn-outline-primary" v-on:click="albums(responseObjectList.album.id, responseObjectList.name)" data-toggle="modal" data-target="#myModal">Check</span></td>
+      </tr>
+    </tbody>
+  </table>
+<!-- The Modal -->
+<div class="modal fade" id="myModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h4 class="modal-title"> {{ albumsName }} </h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="modal-body">
+        <template v-if="albumsObject.length!==0"> 
+          <div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Song Lists</th>
+                </tr>
+              </thead>
+            <tbody>
+              <tr v-for="item,index in albumsObject">
+                <td>{{ item.name }}</td>
+              </tr>
+            </tbody>
+            </table>
+          </div>
+        </template>
+        <template v-else>
+          <div>
+            no data
+          </div>
+        </template>
+      </div>
+
+      <!-- Modal footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+
+
+<script>
+  function get_charts() {
+
+    axios({
+        method: 'get',
+        url: "https://api.kkbox.com/v1.1/new-hits-playlists/DZrC8m29ciOFY2JAm3",
+        params: {
+          "territory": "TW",
+        },
+        headers: {
+          'accept': "application/json",
+          'Authorization': "Bearer " + "W9V3L4G8qcPD0ejOvmbfNA=="
+        }
+      })
+      .then((res) => {
+        let response = res.data
+        console.log(response.tracks.data)
+
+        for (let str of response.tracks.data) {
+          console.log(str);
+        }
+
+        // response.tracks.data.entries()((item, i) => {
+        // str += item["album"]["artist"]["name"] + 
+        //     " 專輯名稱:"+item["album"]["name"] + "\n"
+        // });
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+
+    //let result = response.json()["tracks"]["data"]
+    let str = ''
+
+
+    return str
+  }
+  // str = get_charts()
+</script>
+
+<script>
+  var app = new Vue({
+    el: '#app',
+    data: {
+      response: [],
+      responseObject: {},
+      albumsObject: "",
+      newSorted: [],
+      albumsName: "",
+    },
+    created() {
+      axios({
+          method: 'get',
+          url: "https://api.kkbox.com/v1.1/new-hits-playlists/DZrC8m29ciOFY2JAm3",
+          params: {
+            "territory": "TW",
+          },
+          headers: {
+            'accept': "application/json",
+            'Authorization': "Bearer " + "4yWiV8IOgnrXVW33YWTClw=="
+          }
+        })
+        .then((res) => {
+          this.response = res.data
+          this.responseObject = this.response.tracks.data
+          console.log(this.responseObject)
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+
+    },
+    methods: {
+      sorted: function (n, m) {
+        // n = responseObject = this.response.tracks.data, m = 正/反順序
+        // 把物件轉陣列 在把日期字串轉成日期格式 sort在做反序排列，正序就反轉
+        this.newSorted = Object.entries(n);
+
+        this.newSorted.sort(function (a, b) {
+          return Date.parse(a[1].album.release_date) - Date.parse(b[1].album.release_date)
+        });
+
+        if (m == "正")
+          this.newSorted.reverse()
+
+        console.log(this.newSorted)
+      },
+      search: function () {
+        axios({
+            method: 'get',
+            url: "https://api.kkbox.com/v1.1/search",
+            params: {
+              "q": "不搖滾 (feat. 告五人)",
+              "territory": "TW",
+              "limit": "50",
+            },
+            headers: {
+              'accept': "application/json",
+              'Authorization': "Bearer " + "4yWiV8IOgnrXVW33YWTClw=="
+            }
+          })
+          .then((res) => {
+            this.response = res.data
+            this.responseObject = this.response.tracks.data
+            console.log(this.responseObject)
+          })
+          .catch((error) => {
+            console.error(error)
+          })
+      },
+      // s = 專輯ID, n = 專輯名稱
+      albums: function (s, n) {
+        console.log(s)
+        console.log(n)
+        this.albumsName = ''
+        if(n)
+          this.albumsName = n
+        axios({
+            method: 'get',
+            url: `https://api.kkbox.com/v1.1/albums/${s}/tracks`,
+            params: {
+              "territory": "TW",
+            },
+            headers: {
+              'accept': "application/json",
+              'Authorization': "Bearer " + "4yWiV8IOgnrXVW33YWTClw=="
+            }
+          })
+          .then((res) => {
+            this.response = res.data
+            this.albumsObject = this.response.data
+            console.log(this.albumsObject)
+          })
+          .catch((error) => {
+            console.error(error)
+          })
+      }
+    },
+  })
+</script>
